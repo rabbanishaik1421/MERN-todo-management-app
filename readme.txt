@@ -1,6 +1,10 @@
-MongoDB Access Details for todo app:
+Concept: Create, update, delete daily tasks
+Features:
 
-Username: rabbanishaik28_db_user
-Password: JJHN0IgPnz43IcTG
+Add / edit / delete todos
 
-mongodb+srv://rabbanishaik28_db_user:JJHN0IgPnz43IcTG@cluster0.ukuwct5.mongodb.net/?appName=Cluster0
+Mark as completed
+
+Store data in MongoDB
+
+Simple REST API
