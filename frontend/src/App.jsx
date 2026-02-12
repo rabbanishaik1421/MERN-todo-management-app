@@ -1,10 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react';
+import axios from "axios";
+import { FaEdit } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
+
 //import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [todos, setTodos] = useState([]);
+  const [title, setTitle] = useState("");
+  const [editId, setEditId]=useState(null);
+  const [completed, setCompleted] = useState(false);
+
+  const fetchTodos = async () => {
+    const res = await axios.get("http://localhost:3000/api/todos");
+    console.log(res.data);
+    setTodos(res.data);
+  };
+
+  const addTodo = async()=>{
+    const res = await axios.post("http://localhost:3000/api/todos", {
+      title:title,
+      completed:false
+    });
+
+    setTitle("");
+    fetchTodos();
+  }
+
+  const editTodo = async(todo)=>{
+    setTitle(todo.title);
+    setEditId(todo._id);
+  }
+
+  const cancelTodo = async()=>{
+    setTitle("");
+    setEditId(null);
+  }
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
 
   return (
     <>
@@ -26,10 +61,13 @@ function App() {
                 <form action="">
                   <div className="form-group mb-3">
                     <label htmlFor="">Enter Title</label>
-                    <input type="text" className="form-control" name="title" id="title" />
+                    <input type="text" className="form-control" name="title" id="title" value={title} onChange={(e)=>{
+                      setTitle(e.target.value)
+                    }} />
                   </div>
                   <div className="form-group">
-                    <button className='btn btn-sm btn-primary'>Save</button>
+                    <button type='button' onClick={addTodo} className='btn btn-sm btn-primary mr-2'>{editId?'Update':'Save'}</button>
+                    &nbsp; &nbsp;<button type='button' onClick={cancelTodo} className='btn btn-sm btn-info ml-2'>Cancel</button>
                   </div>
                 </form>
               </div>
@@ -53,6 +91,17 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
+                {todos.map((todo, index) => {
+                  return (
+                    <tr key={todo._id || index}>
+                      <td>{index + 1}</td>
+                      <td>{todo.title}</td>
+                      <td>{todo.completed?"Yes":"No"}</td>                      
+                      <td><a href='#' className='text-primary' onClick={()=>editTodo(todo)} ><FaEdit /></a> </td>
+                      <td><a href='#' className='text-danger' onClick={()=>deleteTodo(todo._id)} ><FaTrash /></a> </td>
+                    </tr>
+                  );
+                })}
                 </tbody>
               </table>
             </div>
