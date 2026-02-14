@@ -3,7 +3,7 @@ import axios from "axios";
 import { FaEdit } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa";
 
-//import './App.css'
+import './App.css'
 
 function App() {
   const [todos, setTodos] = useState([]);
@@ -18,10 +18,18 @@ function App() {
   };
 
   const addTodo = async()=>{
-    const res = await axios.post("http://localhost:3000/api/todos", {
-      title:title,
-      completed:false
-    });
+    if(editId){
+      const res = await axios.put(`http://localhost:3000/api/todos/${editId}`, {
+        title:title
+      });
+      setEditId(null);
+    }
+    else{
+      const res = await axios.post("http://localhost:3000/api/todos", {
+        title:title,
+        completed:false
+      });
+    }
 
     setTitle("");
     fetchTodos();
@@ -37,25 +45,41 @@ function App() {
     setEditId(null);
   }
 
+  const deleteTodo=async(id)=>{
+    const confirmDelete = window.confirm("Are you sure, you want to delete this record!")
+    
+    if(!confirmDelete) return;
+
+    await axios.delete(`http://localhost:3000/api/todos/${id}`);
+    fetchTodos();
+  }
+
+  const updateCompleted=async(id, completed)=>{
+    await axios.put(`http://localhost:3000/api/todos/${id}`,{
+      completed:completed
+    });
+    fetchTodos();
+  }
+
   useEffect(() => {
     fetchTodos();
   }, []);
 
   return (
     <>
-    <div className="container p-5">
+    <div className="container-fluid p-5">
       <div className="row">
         <div className="col-sm-12">
-          <h4 className='text-center mb-5'>Todo App</h4>
+          <h4 className='mb-5 text-center text-uppercase bg-info p-2'>Todo App</h4>
         </div>
       </div>
       
       <div className="row">
         <div className="col-sm-4">
-          <div className="container">
-            <div className="card">
-              <div className="card-header">
-                <h6 className="card-title">Add To do</h6>
+          <div className="">
+            <div className="card border-primary">
+              <div className="card-header bg-info">
+                <h6 className="card-title">{editId?"Edit":"Add"} To do</h6>
               </div>
               <div className="card-body">
                 <form action="">
@@ -75,9 +99,9 @@ function App() {
           </div>
         </div>
         <div className="col-sm-8">
-          <div className="card w-100">
-            <div className="card-header">
-              <div className="card-title">To do list</div>        
+          <div className="card border-primary w-100">
+            <div className="card-header bg-info">
+              <h6 className="card-title">To do list</h6>        
             </div>
             <div className="card-body">
               <table className="table table-bordered table-hover table-responsive">
@@ -96,7 +120,14 @@ function App() {
                     <tr key={todo._id || index}>
                       <td>{index + 1}</td>
                       <td>{todo.title}</td>
-                      <td>{todo.completed?"Yes":"No"}</td>                      
+                      <td>
+                        <select className='form-control w-50' value={todo.completed?'yes':'no'} name="" id="" onChange={(e)=>{
+                          updateCompleted(todo._id, e.target.value === 'yes')
+                        }}>
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
+                        </select>
+                      </td>                      
                       <td><a href='#' className='text-primary' onClick={()=>editTodo(todo)} ><FaEdit /></a> </td>
                       <td><a href='#' className='text-danger' onClick={()=>deleteTodo(todo._id)} ><FaTrash /></a> </td>
                     </tr>
